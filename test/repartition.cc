@@ -23,10 +23,10 @@ void freeMesh(apf::Mesh* m)
   apf::destroyMesh(m);
 }
 
-bool switchToOriginals()
+bool switchToOriginals(apf::Mesh2* m)
 {
-  apf::Contract contract(inputPartCount, PCU_Comm_Peers());
-  int self = PCU_Comm_Self();
+  apf::Contract contract(inputPartCount, m->getPCU()->Peers());
+  int self = m->getPCU()->Self();
   int group;
   int groupRank;
   bool isOriginal = contract.isValid(self);
@@ -41,16 +41,16 @@ bool switchToOriginals()
   }
   MPI_Comm groupComm;
   MPI_Comm_split(MPI_COMM_WORLD, group, groupRank, &groupComm);
-  PCU_Switch_Comm(groupComm);
+  m->getPCU()->SwitchMPIComm(groupComm);
   return isOriginal;
 }
 
-void switchToAll()
+void switchToAll(apf::Mesh2* m)
 {
-  MPI_Comm prevComm = PCU_Get_Comm();
-  PCU_Switch_Comm(MPI_COMM_WORLD);
+  MPI_Comm prevComm = m->getPCU()->GetMPIComm();
+  m->getPCU()->SwitchMPIComm(MPI_COMM_WORLD);
   MPI_Comm_free(&prevComm);
-  PCU_Barrier();
+  m->getPCU()->Barrier();
 }
 
 void getConfig(int argc, char** argv)
@@ -101,10 +101,10 @@ int main(int argc, char** argv)
   getConfig(argc,argv);
   gmi_model* g = gmi_load(modelFile);
   apf::Mesh2* m = 0;
-  bool isOriginal = switchToOriginals();
+  bool isOriginal = switchToOriginals(m);
   if (isOriginal)
     m = apf::loadMdsMesh(g, meshFile);
-  switchToAll();
+  switchToAll(m);
   m = apf::MdsMesh(m, g, inputPartCount);
   balance(m);
   Parma_PrintPtnStats(m, "");
