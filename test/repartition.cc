@@ -3,6 +3,7 @@
 #include <apfMesh2.h>
 #include <apfMDS.h>
 #include <PCU.h>
+#include <PCUObj.h>
 #include <lionPrint.h>
 #include <parma.h>
 #include <apfZoltan.h>
@@ -23,10 +24,15 @@ void freeMesh(apf::Mesh* m)
   apf::destroyMesh(m);
 }
 
-bool switchToOriginals()
+struct SwitchToOriginalResult {
+  bool isOriginal;
+  MPI_Comm groupComm;
+};
+
+SwitchToOriginalResult switchToOriginals(pcu::PCU &worldPCU)
 {
-  apf::Contract contract(inputPartCount, PCU_Comm_Peers());
-  int self = PCU_Comm_Self();
+  apf::Contract contract(inputPartCount, worldPCU.Peers());
+  int self = worldPCU.Self();
   int group;
   int groupRank;
   bool isOriginal = contract.isValid(self);
@@ -41,8 +47,8 @@ bool switchToOriginals()
   }
   MPI_Comm groupComm;
   MPI_Comm_split(MPI_COMM_WORLD, group, groupRank, &groupComm);
-  PCU_Switch_Comm(groupComm);
-  return isOriginal;
+  //pcu::PCU PCUComm = new pcu::PCU(groupComm);
+  return SwitchToOriginalResult{isOriginal, groupComm};
 }
 
 void switchToAll()
@@ -92,6 +98,7 @@ void balance(apf::Mesh2* m)
 
 }
 
+/**
 int main(int argc, char** argv)
 {
   MPI_Init(&argc,&argv);
@@ -113,5 +120,33 @@ int main(int argc, char** argv)
   PCU_Comm_Free();
   MPI_Finalize();
 }
+**/
+int main(int argc, char** argv){
+  MPI_Init(&argc, &argv);
+  pcu::PCU *originalPCU = new pcu::PCU(MPI_COMM_WORLD);
+  struct SwitchToOriginalResult result = switchToOriginals(*originalPCU);
+  bool isOriginal = result.isOriginal;
+  pcu::PCU *expandedPCU = new pcu::PCU(result.groupComm);
 
+  lion_set_verbosity(1);
+  gmi_register_mesh();
+  getConfig(argc,argv);
+  gmi_model* g = gmi_load(modelFile);
+  apf::Mesh2* originalMesh = nullptr;
+  apf::Mesh2* expandedMesh = nullptr;
+
+  if (isOriginal)
+    originalMesh = apf::loadMdsMesh(g, meshFile, expandedPCU);
+  expandedPCU = pcu::PCU_GetGlobal();
+  expandedPCU->Barrier();
+  expandedMesh = apf::expandMdsMesh(originalMesh, g, inputPartCount, expandedPCU);
+
+  
+  balance(expandedMesh);
+  Parma_PrintPtnStats(expandedMesh, "");
+  expandedMesh->writeNative(outFile);
+  freeMesh(originalMesh);
+  freeMesh(expandedMesh);
+  MPI_Finalize();
+}
 

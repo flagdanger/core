@@ -620,10 +620,10 @@ int getFirstType(Mesh* m, int dim);
 void getAlignment(Mesh* m, MeshEntity* elem, MeshEntity* boundary,
     int& which, bool& flip, int& rotate);
 
-void packString(std::string s, int to);
-std::string unpackString();
+void packString(std::string s, int to, pcu::PCU* pcuObj = nullptr);
+std::string unpackString(pcu::PCU* pcuObj = nullptr);
 void packTagInfo(Mesh* m, MeshTag* t, int to);
-void unpackTagInfo(std::string& name, int& type, int& size);
+void unpackTagInfo(std::string& name, int& type, int& size, Mesh* m);
 
 extern char const* const dimName[4];
 

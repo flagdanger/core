@@ -573,13 +573,13 @@ static void verifyFields(Mesh* m)
   m->getPCU()->Send();
   while (m->getPCU()->Receive()) {
     int n;
-    PCU_COMM_UNPACK(n);
+    m->getPCU()->Unpack(n);
     PCU_ALWAYS_ASSERT(fields.size() == (size_t)n);
     for (int i = 0; i < n; ++i) {
       std::string name;
       int type;
       int size;
-      unpackTagInfo(name, type, size);
+      unpackTagInfo(name, type, size, m);
       PCU_ALWAYS_ASSERT(name == getName(fields[i]));
       PCU_ALWAYS_ASSERT(type == getValueType(fields[i]));
       PCU_ALWAYS_ASSERT(size == countComponents(fields[i]));
@@ -757,13 +757,13 @@ static void verifyTags(Mesh* m)
   m->getPCU()->Send();
   while (m->getPCU()->Receive()) {
     int n;
-    PCU_COMM_UNPACK(n);
+    m->getPCU()->Unpack(n);
     PCU_ALWAYS_ASSERT(tags.getSize() == (size_t)n);
     for (int i = 0; i < n; ++i) {
       std::string name;
       int type;
       int size;
-      unpackTagInfo(name, type, size);
+      unpackTagInfo(name, type, size, m);
       PCU_ALWAYS_ASSERT(name == m->getTagName(tags[i]));
       PCU_ALWAYS_ASSERT(type == m->getTagType(tags[i]));
       PCU_ALWAYS_ASSERT(size == m->getTagSize(tags[i]));

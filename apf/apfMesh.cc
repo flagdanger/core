@@ -1170,20 +1170,24 @@ void getAlignment(Mesh* m, MeshEntity* elem, MeshEntity* boundary,
   rotate = findIn(bv, nbv, ebv[0]);
 }
 
-void packString(std::string s, int to)
+void packString(std::string s, int to, pcu::PCU* pcuObj)
 {
+  if(pcuObj == nullptr)
+    pcuObj = pcu::PCU_GetGlobal();
   size_t len = s.length();
-  PCU_COMM_PACK(to, len);
-  PCU_Comm_Pack(to, s.c_str(), len);
+  pcuObj->Pack(to, len);
+  pcuObj->Pack(to, s.c_str(), len);
 }
 
-std::string unpackString()
+std::string unpackString(pcu::PCU* pcuObj)
 {
+  if(pcuObj == nullptr)
+    pcuObj = pcu::PCU_GetGlobal();
   std::string s;
   size_t len;
-  PCU_COMM_UNPACK(len);
+  pcuObj->Unpack(len);
   s.resize(len);
-  PCU_Comm_Unpack((void*)s.c_str(), len);
+  pcuObj->Unpack((void*)s.c_str(), len);
   return s;
 }
 
@@ -1191,7 +1195,7 @@ void packTagInfo(Mesh* m, MeshTag* t, int to)
 {
   std::string name;
   name = m->getTagName(t);
-  packString(name, to);
+  packString(name, to, m->getPCU());
   int type;
   type = m->getTagType(t);
   m->getPCU()->Pack(to, type);
@@ -1200,11 +1204,11 @@ void packTagInfo(Mesh* m, MeshTag* t, int to)
   m->getPCU()->Pack(to, size);
 }
 
-void unpackTagInfo(std::string& name, int& type, int& size)
+void unpackTagInfo(std::string& name, int& type, int& size, Mesh* m)
 {
-  name = unpackString();
-  PCU_COMM_UNPACK(type);
-  PCU_COMM_UNPACK(size);
+  name = unpackString(m->getPCU());
+  m->getPCU()->Unpack(type);
+  m->getPCU()->Unpack(size);
 }
 
 char const* const dimName[4] = {

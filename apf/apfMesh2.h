@@ -199,8 +199,8 @@ void stitchMesh(Mesh2* m);
 /** \brief removes all entities and fields. */
 void clear(Mesh2* m);
 
-void packDataClone(Mesh2* m, int to);
-void unpackDataClone(Mesh2* m);
+void packDataClone(Mesh2* m, int to, pcu::PCU* pcuObj = nullptr);
+void unpackDataClone(Mesh2* m, pcu::PCU* pcuObj = nullptr);
 
 // common functions for migration/ghosting/distribution
 typedef std::vector<MeshEntity*> EntityVector;

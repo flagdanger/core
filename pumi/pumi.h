@@ -206,10 +206,10 @@ pMeshEnt pumi_mesh_createEnt(pMesh m, pGeomEnt ge, int target_topology, pMeshEnt
 pMeshEnt pumi_mesh_createElem(pMesh m, pGeomEnt ge, int target_topology, pMeshEnt* vertices); 
 
 // load a serial mesh and no partitioning
-pMesh pumi_mesh_loadSerial(pGeom g, const char* file_name, const char* mesh_type="mds");
+pMesh pumi_mesh_loadSerial(pGeom g, const char* file_name, const char* mesh_type="mds", pcu::PCU *pcuObj = pcu::PCU_GetGlobal());
 
 // load a mesh from a file. Do static partitioning if num_in_part==1
-pMesh pumi_mesh_load(pGeom geom, const char* fileName, int num_in_part, const char* mesh_type="mds");
+pMesh pumi_mesh_load(pGeom geom, const char* fileName, int num_in_part, const char* mesh_type="mds", pcu::PCU *pcuObj = pcu::PCU_GetGlobal());
 
 // load a mesh from a an existing partitioned apf mesh
 pMesh pumi_mesh_load(pMesh mesh);
