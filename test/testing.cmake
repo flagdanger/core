@@ -330,6 +330,11 @@ if(ENABLE_ZOLTAN)
     "${MESHES}/cube/cube.dmg"
     "${MESHES}/cube/pumi670/cube.smb"
     "1")
+  mpi_test(anisoDelta_ma_serial 48
+    ./anisoDelta_ma_test
+    ".null"
+    "${MESHES}/deltaWing_48p.smb"
+    "0")
   mpi_test(torus_ma_parallel 4
     ./torus_ma_test
     "${MESHES}/torus/torus.dmg"
