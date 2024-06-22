@@ -312,9 +312,9 @@ void ZoltanData::setup()
   char paramStr[128];
 
   //sizes
-  snprintf(paramStr, 128, "%u", 1);
+  snnprintf(paramStr, 128, "%u", 1);
   Zoltan_Set_Param(ztn, "num_gid_entries", paramStr);
-  snprintf(paramStr, 128, "%u", 1);
+  snnprintf(paramStr, 128, "%u", 1);
   Zoltan_Set_Param(ztn, "num_lid_entries", paramStr);
 
   //weights
