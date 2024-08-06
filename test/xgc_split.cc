@@ -18,7 +18,7 @@ int serial=0;
 void getConfig(int argc, char** argv, pcu::PCU* PCUObj)
 {
   if (argc < 4) {
-    if (!pumi_rank(PCUObj) )
+    if (!PCUObj->Self())
       printf("Usage: %s <model> <mesh> <outMesh>\n", argv[0]);
     MPI_Finalize();
     exit(EXIT_FAILURE);
@@ -34,11 +34,11 @@ Migration* get_xgc_plan(pGeom g, pMesh m)
 {
   int dim = pumi_mesh_getDim(m);
   Migration* plan = new Migration(m);
-  if (!pumi_rank(m->getPCU())) return plan;
+  if (!pumi_rank()) return plan;
 
   pMeshEnt e;
   int num_gface = pumi_geom_getNumEnt(g, dim);
-  PCU_ALWAYS_ASSERT(num_gface==pumi_size(m->getPCU()));
+  PCU_ALWAYS_ASSERT(num_gface==pumi_size());
   int gface_id;
   int dest_pid;
   pMeshIter it = m->begin(2); // face
@@ -58,21 +58,21 @@ int main(int argc, char** argv)
   MPI_Init(&argc,&argv);
   {
   auto PCUObj = std::unique_ptr<pcu::PCU>(new pcu::PCU(MPI_COMM_WORLD));
-
+  pumi_load_pcu(PCUObj.get());
   getConfig(argc,argv,PCUObj.get());
 
-  pGeom g = pumi_geom_load(modelFile, PCUObj.get());
+  pGeom g = pumi_geom_load(modelFile);
   pMesh m;
   if (serial) 
   {
-    m = pumi_mesh_loadSerial(g, meshFile, PCUObj.get());
+    m = pumi_mesh_loadSerial(g, meshFile);
     // split a serial mesh based on model ID
     Migration* plan = get_xgc_plan(g, m);
     pumi_mesh_migrate(m, plan);
     pumi_mesh_write(m, outFile);
   }
   else 
-    m = pumi_mesh_load(g, meshFile, pumi_size(PCUObj.get()), PCUObj.get());
+    m = pumi_mesh_load(g, meshFile, pumi_size());
 
   // write to vtk
   char without_extension[256];

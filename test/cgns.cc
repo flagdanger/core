@@ -5,7 +5,7 @@
 #include <gmi_mesh.h>
 #include <apfMDS.h>
 #include <apfMesh2.h>
-#include <PCU2.h>
+#include <PCU.h>
 #include <lionPrint.h>
 #include <cstdlib>
 //
@@ -178,7 +178,7 @@ std::string doit(apf::CGNSBCMap &cgnsBCMap, const std::string &argv1, const std:
   gmi_register_null();
   gmi_register_mesh();
   gmi_model *g = gmi_load(".null");
-  PCUHandle h;
+  PCU_t h;
   h.ptr = static_cast<void*>(PCUObj);
   apf::Mesh2 *m = apf::loadMdsFromCGNS2(h, g, argv1.c_str(), cgnsBCMap, meshData);
   m->verify();
@@ -482,6 +482,7 @@ int main(int argc, char **argv)
   MPI_Init(&argc, &argv);
   {
   auto PCUObj = std::unique_ptr<pcu::PCU>(new pcu::PCU(MPI_COMM_WORLD));
+  pumi_load_pcu(PCUObj.get());
   lion_set_verbosity(1);
   bool additionalTests = false;
   if (argc < 3)

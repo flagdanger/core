@@ -16,32 +16,30 @@
 //      0- SYSTEM-LEVEL FUNCTIONS
 //************************************
 //************************************
-
-void pumi_finalize(pcu::PCU *PCUObj, bool)
-{
-  delete PCUObj;
+void pumi_load_pcu(pcu::PCU *PCUObj){
+  pumi::instance()->initializePCU(PCUObj);
 }
 
-int pumi_size(pcu::PCU *PCUObj)
+int pumi_size()
 {
-  return PCUObj->Peers();
+  return pumi::instance()->getPCU()->Peers();
 }
 
-int pumi_rank(pcu::PCU *PCUObj)
+int pumi_rank()
 {
-  return PCUObj->Self();
+  return pumi::instance()->getPCU()->Self();
 }
 
-void pumi_sync(pcu::PCU *PCUObj)
+void pumi_sync()
 {
-  MPI_Barrier(PCUObj->GetMPIComm());
+  MPI_Barrier(pumi::instance()->getPCU()->GetMPIComm());
 }
 
 #include <sys/utsname.h>
 #include <sys/resource.h>
-void pumi_printSys(pcu::PCU *PCUObj)
+void pumi_printSys()
 {
-  if (PCUObj->Self()) return;
+  if (pumi::instance()->getPCU()->Self()) return;
   struct utsname u;
   if (uname(&u) == 0)
     lion_oprint(1,"[%s] %s %s %s %s %s\n\n",
@@ -61,9 +59,9 @@ double pumi_getMem()
   return pcu::GetMem();
 }
 
-void pumi_printTimeMem(const char* msg, double time, double memory, pcu::PCU *PCUObj)
+void pumi_printTimeMem(const char* msg, double time, double memory)
 {
-  if (!PCUObj->Self())
+  if (!pumi::instance()->getPCU()->Self())
   {
     lion_oprint(1,"%-20s %6.3f sec %7.3f MB \n", msg, time, memory);
     fflush(stdout);
