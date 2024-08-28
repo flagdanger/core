@@ -141,7 +141,7 @@ int main(int argc, char** argv) {
   AnIso sf (m);
   // the metrics should be given as input using sizes and frames same as
   // test/highOrderSizeFields.cc
-  ma::Input* in = ma::configure (m, &sf, 0, logInterpolation);
+  ma::Input* in = ma::makeAdvanced(ma::configure (m, &sf, 0, logInterpolation));
   in-> shouldRunPreZoltan = true;
   in-> shouldRunPostZoltan = true;
   in-> shouldRunMidParma = false;
@@ -156,7 +156,7 @@ int main(int argc, char** argv) {
 
   std::vector<double> lengths;
   std::vector<double> qualities;
-  in = ma::configure (m, &sf, 0, logInterpolation);
+  in = ma::makeAdvanced(ma::configure (m, &sf, 0, logInterpolation));
   ma::stats(m, in->sizeField, lengths, qualities, true);// we need to define
   // the size fields in order to get the lengths and qualities
 
